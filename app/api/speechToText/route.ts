@@ -14,6 +14,7 @@ export async function POST(req: Request) {
   // Convert the base64 audio data to a Buffer
   const audio = Buffer.from(base64Audio, "base64");
 
+  createDirectoryIfNotExists("tmp")
   // Define the file path for storing the temporary WAV file
   const filePath = "tmp/input.wav";
 
@@ -40,3 +41,14 @@ export async function POST(req: Request) {
     return NextResponse.error();
   }
 }
+
+function createDirectoryIfNotExists(directoryPath: string) {
+    // Check if the directory already exists
+    if (!fs.existsSync(directoryPath)) {
+      // If not, create the directory
+      fs.mkdirSync(directoryPath);
+      console.log(`Directory created: ${directoryPath}`);
+    } else {
+      console.log(`Directory already exists: ${directoryPath}`);
+    }
+  }
