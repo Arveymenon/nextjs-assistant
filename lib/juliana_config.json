@@ -1,0 +1,38 @@
+{
+    "name": "appointment_scheduler",
+    "description": "Set, Update or Delete Apppointments",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The appointment is scheduled for"
+        },
+        "contact": {
+          "type": "string",
+          "description": "The contact number of the scheduler"
+        },
+        "schedule_type": {
+          "type": "string",
+          "description": "Should strictly be either strings 'set', 'update' or 'delete'"
+        },
+        "schedule_start_datetime": {
+          "type": "string",
+          "description": "Appointment start time"
+        },
+        "schedule_end_datetime": {
+          "type": "string",
+          "description": "Appointment end time"
+        },
+        "previous_appointment_id": {
+          "type": "string",
+          "description": "If an appointment was booked earlier"
+        }
+      },
+      "required": [
+        "schedule_type",
+        "schedule_start_datetime",
+        "schedule_end_datetime"
+      ]
+    }
+  }

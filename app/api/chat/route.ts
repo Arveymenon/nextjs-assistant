@@ -2,7 +2,7 @@ import { kv } from '@vercel/kv'
 import { OpenAIStream, StreamingTextResponse } from 'ai'
 import OpenAI from 'openai'
 
-import { auth } from '@/auth'
+// import { auth } from '@/auth'
 import { nanoid } from '@/lib/utils'
 
 export const runtime = 'edge'
@@ -14,7 +14,8 @@ const openai = new OpenAI({
 export async function POST(req: Request) {
   const json = await req.json()
   const { messages, previewToken } = json
-  const userId = (await auth())?.user.id
+  // const userId = (await auth())?.user.id
+  const userId = 100;
 
   if (!userId) {
     return new Response('Unauthorized', {

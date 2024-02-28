@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/tooltip'
 import { IconArrowElbow, IconPlus } from '@/components/ui/icons'
 import { useRouter } from 'next/navigation'
+import { Microphone } from './ui/microphone'
 
 export interface PromptProps
   extends Pick<UseChatHelpers, 'input' | 'setInput'> {
@@ -27,22 +28,25 @@ export function PromptForm({
   const { formRef, onKeyDown } = useEnterSubmit()
   const inputRef = React.useRef<HTMLTextAreaElement>(null)
   const router = useRouter()
+
   React.useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus()
     }
   }, [])
 
+  const formSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    if (!input?.trim()) {
+      return
+    }
+    setInput('')
+    await onSubmit(input)
+  }
+
   return (
     <form
-      onSubmit={async e => {
-        e.preventDefault()
-        if (!input?.trim()) {
-          return
-        }
-        setInput('')
-        await onSubmit(input)
-      }}
+      onSubmit={formSubmit}
       ref={formRef}
     >
       <div className="relative flex flex-col w-full px-8 overflow-hidden max-h-60 grow bg-background sm:rounded-md sm:border sm:px-12">
@@ -76,6 +80,15 @@ export function PromptForm({
           spellCheck={false}
           className="min-h-[60px] w-full resize-none bg-transparent px-4 py-[1.3rem] focus-within:outline-none sm:text-sm"
         />
+
+      <div className="absolute right-0 top-4 sm:right-16">
+        <Tooltip>
+          <TooltipTrigger asChild>
+              <Microphone onSubmit={onSubmit}/>
+          </TooltipTrigger>
+          <TooltipContent>Send message</TooltipContent>
+          </Tooltip>
+        </div>
         <div className="absolute right-0 top-4 sm:right-4">
           <Tooltip>
             <TooltipTrigger asChild>

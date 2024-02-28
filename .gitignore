@@ -4,6 +4,7 @@
 node_modules
 .pnp
 .pnp.js
+pnpm-lock.yaml
 
 # testing
 coverage
@@ -36,3 +37,5 @@ yarn-error.log*
 .vercel
 .vscode
 .env*.local
+
+tmp/

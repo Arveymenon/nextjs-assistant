@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { type UseChatHelpers } from 'ai/react'
 
-import { shareChat } from '@/app/actions'
+// import { shareChat } from '@/app/actions'
 import { Button } from '@/components/ui/button'
 import { PromptForm } from '@/components/prompt-form'
 import { ButtonScrollToBottom } from '@/components/button-scroll-to-bottom'
@@ -67,7 +67,7 @@ export function ChatPanel({
                       <IconShare className="mr-2" />
                       Share
                     </Button>
-                    <ChatShareDialog
+                    {/* <ChatShareDialog
                       open={shareDialogOpen}
                       onOpenChange={setShareDialogOpen}
                       onCopy={() => setShareDialogOpen(false)}
@@ -77,7 +77,7 @@ export function ChatPanel({
                         title,
                         messages
                       }}
-                    />
+                    /> */}
                   </>
                 ) : null}
               </div>
@@ -97,7 +97,6 @@ export function ChatPanel({
             setInput={setInput}
             isLoading={isLoading}
           />
-          <FooterText className="hidden sm:block" />
         </div>
       </div>
     </div>

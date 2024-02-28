@@ -6,10 +6,11 @@ import { signIn } from 'next-auth/react'
 import { cn } from '@/lib/utils'
 import { Button, type ButtonProps } from '@/components/ui/button'
 import { IconGitHub, IconSpinner } from '@/components/ui/icons'
+// import { auth } from '@/auth'
 
 interface LoginButtonProps extends ButtonProps {
   showGithubIcon?: boolean
-  text?: string
+  text?: string 
 }
 
 export function LoginButton({
@@ -22,10 +23,12 @@ export function LoginButton({
   return (
     <Button
       variant="outline"
-      onClick={() => {
+      onClick={async () => {
         setIsLoading(true)
         // next-auth signIn() function doesn't work yet at Edge Runtime due to usage of BroadcastChannel
-        signIn('github', { callbackUrl: `/` })
+        signIn()
+        // const session = await auth()
+        // session?.user
       }}
       disabled={isLoading}
       className={cn(className)}
