@@ -3,7 +3,7 @@
 import { Chat } from '@/lib/types'
 import { AnimatePresence, motion } from 'framer-motion'
 
-import { removeChat, shareChat } from '@/app/actions'
+import { removeChat } from '@/app/actions'
 
 import { SidebarActions } from '@/components/sidebar-actions'
 import { SidebarItem } from '@/components/sidebar-item'
@@ -27,13 +27,13 @@ export function SidebarItems({ chats }: SidebarItemsProps) {
                 height: 0
               }}
             >
-              <SidebarItem index={index} chat={chat}>
+              {/* <SidebarItem index={index} chat={chat}>
                 <SidebarActions
                   chat={chat}
                   removeChat={removeChat}
                   shareChat={shareChat}
                 />
-              </SidebarItem>
+              </SidebarItem> */}
             </motion.div>
           )
       )}
