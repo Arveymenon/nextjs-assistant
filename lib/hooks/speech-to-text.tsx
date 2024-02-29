@@ -44,7 +44,8 @@ export const useRecordVoice = () => {
         body: JSON.stringify({
           audio: base64data,
         }),
-      }).then((res) => res.json());
+      }).then((res) => res.json())
+      .catch(err=> {console.log(err); return err} )
       const { text } = response;
       setText(text);
     } catch (error) {

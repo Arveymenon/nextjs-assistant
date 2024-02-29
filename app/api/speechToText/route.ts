@@ -13,7 +13,7 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-export async function POST(req: Request) {
+export async function POST(req: Request, response: Response) {
   const body = await req.json();
   
   const base64Audio = body.audio;
@@ -44,7 +44,8 @@ export async function POST(req: Request) {
         fs.unlinkSync(filePath);
     } else {
         const { url } = await put(filePath, audio, { access: 'public' });
-        
+
+        console.log("The Speech URL", url)
         const { data: fileData } = await axios.get(url, {
             responseType: 'arraybuffer',
         });
@@ -54,9 +55,8 @@ export async function POST(req: Request) {
             file: file,
             model: "whisper-1"
         });
-        del(filePath);
+        del(url);
     }
-
     return NextResponse.json(data);
   } catch (error) {
     console.error("Error processing audio:", error);
