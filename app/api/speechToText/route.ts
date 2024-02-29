@@ -28,7 +28,8 @@ export async function POST(req: Request) {
   
   try {
       let file, data;
-      if (process.env.NODE_ENV === "development") {
+      
+      if (process.env.NODE_ENV === "development" && false) {
           // Write the audio data to a temporary WAV file synchronously
           createDirectoryIfNotExists("tmp")
           // Create a readable stream from the temporary WAV file
@@ -73,24 +74,3 @@ function createDirectoryIfNotExists(directoryPath: string) {
       console.log(`Directory already exists: ${directoryPath}`);
     }
   }
-
-const createUrlReadStream = (url: string): Readable => {
-    const readable = new Readable({
-      read() {}, // No-op
-    })
-  
-    get(url, (response) => {
-      response.on('data', (chunk: any) => {
-        readable.push(chunk)
-      })
-  
-      response.on('end', () => {
-        readable.push(null) // End of stream
-      })
-    }).on('error', (error) => {
-      readable.emit('error', error) // Forward the error to the readable stream
-    })
-  
-    return readable
-}
-  
