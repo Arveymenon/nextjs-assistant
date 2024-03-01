@@ -1,6 +1,6 @@
 import * as React from 'react'
 import Textarea from 'react-textarea-autosize'
-import { UseChatHelpers } from 'ai/react'
+import { UseAssistantHelpers, UseChatHelpers } from 'ai/react'
 import { useEnterSubmit } from '@/lib/hooks/use-enter-submit'
 import { cn } from '@/lib/utils'
 import { Button, buttonVariants } from '@/components/ui/button'
@@ -14,20 +14,25 @@ import { useRouter } from 'next/navigation'
 import { Microphone } from './ui/microphone'
 
 export interface PromptProps
-  extends Pick<UseChatHelpers, 'input' | 'setInput'> {
-  onSubmit: (value: string) => void
+  extends Pick<UseAssistantHelpers, 'input' | 'setInput'> {
+  submitMessage: (e: React.FormEvent<HTMLFormElement>) => void,
+  handleInputChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void,
   isLoading: boolean
 }
 
 export function PromptForm({
-  onSubmit,
+  submitMessage,
+  handleInputChange,
   input,
   setInput,
   isLoading
 }: PromptProps) {
   const { formRef, onKeyDown } = useEnterSubmit()
   const inputRef = React.useRef<HTMLTextAreaElement>(null)
+  const submitButtonRef = React.useRef<HTMLButtonElement>(null)
   const router = useRouter()
+
+  const [ microphoneUsed, setMicrophoneUsed ] = React.useState<boolean>(false)
 
   React.useEffect(() => {
     if (inputRef.current) {
@@ -41,8 +46,16 @@ export function PromptForm({
       return
     }
     setInput('')
-    await onSubmit(input)
+    await submitMessage(e)
   }
+
+  React.useEffect(() => {
+    if (input && microphoneUsed) {
+      setMicrophoneUsed(false)
+      // Trigger form submission
+      submitButtonRef.current?.click();
+    }
+  }, [input, microphoneUsed]);
 
   return (
     <form
@@ -75,7 +88,10 @@ export function PromptForm({
           onKeyDown={onKeyDown}
           rows={1}
           value={input}
-          onChange={e => setInput(e.target.value)}
+          onChange={e => {
+            setInput(e.target.value)
+            handleInputChange(e)
+          }}
           placeholder="Send a message."
           spellCheck={false}
           className="min-h-[60px] w-full resize-none bg-transparent px-4 py-[1.3rem] focus-within:outline-none sm:text-sm"
@@ -84,7 +100,10 @@ export function PromptForm({
       <div className="absolute right-0 top-4 sm:right-16">
         <Tooltip>
           <TooltipTrigger asChild>
-              <Microphone onSubmit={onSubmit}/>
+              <Microphone onSubmit={(text)=> {
+                  setInput(text)
+                  setMicrophoneUsed(true)
+                }}/>
           </TooltipTrigger>
           <TooltipContent>Send message</TooltipContent>
           </Tooltip>
@@ -93,6 +112,7 @@ export function PromptForm({
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
+                ref={submitButtonRef}
                 type="submit"
                 size="icon"
                 disabled={isLoading || input === ''}
@@ -105,6 +125,7 @@ export function PromptForm({
           </Tooltip>
         </div>
       </div>
+
     </form>
   )
 }

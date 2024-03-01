@@ -4,6 +4,11 @@ import { Button } from '@/components/ui/button'
 import { ExternalLink } from '@/components/external-link'
 import { IconArrowRight } from '@/components/ui/icons'
 
+import { useTts } from 'tts-react'
+
+import { useCallback, useEffect, useState } from 'react'
+import TextToSpeech from '@/lib/hooks/text-to-speech'
+
 const exampleMessages = [
   {
     heading: 'Explain technical concepts',
@@ -22,13 +27,20 @@ const exampleMessages = [
 const titleText = "Hi! My Name's Juliana. How can I help you?"
 const subText = "Can I help you with scheduling an you appointment with our Doctor?"
 
+
 export function EmptyScreen({ setInput }: Pick<UseChatHelpers, 'setInput'>) {
+
+  const [ textToBeSpoken, setTextToBeSpoken ] = useState(subText)
+
   return (
     <div className="mx-auto max-w-2xl px-4">
       <div className="rounded-lg border bg-background p-8">
         <h1 className="mb-2 text-lg font-semibold">
-          {titleText}
+            {titleText}
         </h1>
+        {textToBeSpoken && 
+          <TextToSpeech textToBeSpoken={textToBeSpoken} setTextToBeSpoken={setTextToBeSpoken}></TextToSpeech>
+        }
         <p className="mb-2 leading-normal text-muted-foreground">
           {subText}
         </p>

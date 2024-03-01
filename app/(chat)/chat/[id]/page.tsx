@@ -42,5 +42,5 @@ export default async function ChatPage({ params }: ChatPageProps) {
   //   notFound()
   // }
 
-  return <Chat id={'1'} />
+  return <Chat />
 }

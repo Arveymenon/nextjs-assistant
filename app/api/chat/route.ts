@@ -1,66 +1,93 @@
-import { kv } from '@vercel/kv'
-import { OpenAIStream, StreamingTextResponse } from 'ai'
-import OpenAI from 'openai'
+// app/api/assistant/route.ts
+import { experimental_AssistantResponse } from "ai";
+import OpenAI from "openai";
+import { MessageContentText } from "openai/resources/beta/threads/messages/messages";
+import { Run } from "openai/resources/beta/threads/runs/runs";
 
-// import { auth } from '@/auth'
-import { nanoid } from '@/lib/utils'
-
-export const runtime = 'edge'
-
+// Create an OpenAI API client (that's edge friendly!)
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-})
+  apiKey: process.env.OPENAI_API_KEY || "",
+});
+
+// IMPORTANT! Set the runtime to edge
+// export const runtime = "edge";
 
 export async function POST(req: Request) {
-  const json = await req.json()
-  const { messages, previewToken } = json
-  // const userId = (await auth())?.user.id
-  const userId = 100;
+  // Parse the request body
+  console.log("Request Initiated")
+  const input: {
+    threadId: string | null;
+    message: string;
+  } = await req.json();
 
-  if (!userId) {
-    return new Response('Unauthorized', {
-      status: 401
-    })
-  }
+  // Create a thread if needed
+  const threadId = input.threadId ?? (await openai.beta.threads.create({})).id;
 
-  if (previewToken) {
-    openai.apiKey = previewToken
-  }
+  // Add a message to the thread
+  const createdMessage = await openai.beta.threads.messages.create(threadId, {
+    role: "user",
+    content: input.message,
+  });
+  console.log("Created message to be sent", input.message)
 
-  const res = await openai.chat.completions.create({
-    model: 'gpt-3.5-turbo',
-    messages,
-    temperature: 0.7,
-    stream: true
-  })
+  return experimental_AssistantResponse(
+    { threadId, messageId: createdMessage.id },
+    async ({ threadId, sendMessage }) => {
+      // Run the assistant on the thread
+      const run = await openai.beta.threads.runs.create(threadId, {
+        assistant_id:
+          process.env.ASSISTANT_ID ??
+          (() => {
+            throw new Error("ASSISTANT_ID is not set");
+          })(),
+      });
+      console.log("run prepared. Thread ID", threadId)
+      async function waitForRun(run: Run) {
+        // Poll for status change
+        while (run.status === "queued" || run.status === "in_progress") {
+          // delay for 500ms:
+          await new Promise((resolve) => setTimeout(resolve, 500));
 
-  const stream = OpenAIStream(res, {
-    async onCompletion(completion) {
-      const title = json.messages[0].content.substring(0, 100)
-      const id = json.id ?? nanoid()
-      const createdAt = Date.now()
-      const path = `/chat/${id}`
-      const payload = {
-        id,
-        title,
-        userId,
-        createdAt,
-        path,
-        messages: [
-          ...messages,
-          {
-            content: completion,
-            role: 'assistant'
-          }
-        ]
+          run = await openai.beta.threads.runs.retrieve(threadId!, run.id);
+        }
+
+        // Check the run status
+        if (
+          run.status === "cancelled" ||
+          run.status === "cancelling" ||
+          run.status === "failed" ||
+          run.status === "expired"
+        ) {
+          throw new Error(run.status);
+        }
       }
-      await kv.hmset(`chat:${id}`, payload)
-      await kv.zadd(`user:chat:${userId}`, {
-        score: createdAt,
-        member: `chat:${id}`
-      })
+      console.log("Waiting for run")
+      await waitForRun(run);
+      
+      // Get new thread messages (after our message)
+      console.log("Get new thread messages")
+      console.log(new Date())
+      const responseMessages = (
+        await openai.beta.threads.messages.list(threadId, {
+          after: createdMessage.id,
+          order: "asc",
+        })
+        ).data;
+        
+      console.log("Sending Response")
+      console.log(new Date())
+      // Send the messages
+      for (const message of responseMessages) {
+        console.log("------------------------ ResponseMessages ------------------------")
+        console.log(message.content)
+        sendMessage({
+          id: message.id,
+          role: "assistant",
+          content: message.content.filter(
+            (content) => content.type === "text"
+          ) as Array<MessageContentText>,
+        });
+      }
     }
-  })
-
-  return new StreamingTextResponse(stream)
+  );
 }

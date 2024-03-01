@@ -3,10 +3,6 @@ import fs from "fs";
 import OpenAI, { toFile } from "openai";
 
 import { put, del } from "@vercel/blob";
-
-import { get } from 'https'
-import { Readable } from 'stream'
-
 import axios from 'axios'
 
 const openai = new OpenAI({
@@ -29,7 +25,7 @@ export async function POST(req: Request, response: Response) {
   try {
       let file, data;
       
-      if (process.env.NODE_ENV === "development" && false) {
+      if (process.env.NODE_ENV === "development") {
           // Write the audio data to a temporary WAV file synchronously
           createDirectoryIfNotExists("tmp")
           // Create a readable stream from the temporary WAV file
@@ -46,9 +42,7 @@ export async function POST(req: Request, response: Response) {
         const { url } = await put(filePath, audio, { access: 'public' });
 
         console.log("The Speech URL", url)
-        const { data: fileData } = await axios.get(url, {
-            responseType: 'arraybuffer',
-        });
+        const { data: fileData } = await axios.get(url, { responseType: 'arraybuffer' });
 
         const file = await toFile(Buffer.from(fileData), fileName);
         data = await openai.audio.transcriptions.create({
