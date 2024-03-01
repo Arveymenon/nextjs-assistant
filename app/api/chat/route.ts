@@ -78,6 +78,8 @@ export async function POST(req: Request) {
                 ],
               }
             );
+            console.log("submit_tool_outputs",run.required_action.submit_tool_outputs)
+            console.log("type",run.required_action.type)
             console.log("Action was submitted")
           }
         }
