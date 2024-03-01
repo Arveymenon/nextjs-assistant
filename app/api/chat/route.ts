@@ -151,5 +151,6 @@ export async function POST(req: Request) {
 }
 
 function appointment_scheduler(args: string) {
+  console.log("appointment_scheduler", args)
   return {success: false}
 }
