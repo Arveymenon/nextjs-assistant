@@ -61,25 +61,28 @@ export async function POST(req: Request) {
         }
 
         if(run.status === 'requires_action'){
+          const firstTool = run.required_action?.submit_tool_outputs?.tool_calls[0]
           console.log("Run in tools", 
-            // run['required_action']?['submit_tool_outputs']?['tool_calls']?["function"]
-            run.required_action?.submit_tool_outputs?.tool_calls
+            firstTool
           )
-          if(run.required_action?.submit_tool_outputs?.tool_calls[0].id){
+          if(firstTool && firstTool.function.arguments) {
+            const args = JSON.parse(firstTool.function.arguments);
+            const result = appointment_scheduler(args);
+
             const runOp = await openai.beta.threads.runs.submitToolOutputs(
               threadId,
               run.id,
               {
                 tool_outputs: [
                   {
-                    tool_call_id: run.required_action?.submit_tool_outputs?.tool_calls[0].id,
-                    output: `{"Nope not possible": "none"}`,
+                    tool_call_id: firstTool.id,
+                    output: JSON.stringify(result),
                   }
                 ],
               }
             );
-            console.log("submit_tool_outputs",run.required_action.submit_tool_outputs)
-            console.log("type",run.required_action.type)
+            console.log("submit_tool_outputs", run?.required_action?.submit_tool_outputs)
+            console.log("type",run?.required_action?.type)
             console.log("Action was submitted")
           }
         }
@@ -123,4 +126,8 @@ export async function POST(req: Request) {
       }
     }
   );
+}
+
+function appointment_scheduler(args: []) {
+  return {success: false}
 }
