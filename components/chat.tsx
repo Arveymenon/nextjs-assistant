@@ -49,7 +49,6 @@ export function Chat({ initialMessages, className }: ChatProps) {
 
   useEffect(()=>{
     if (messages.length && messages[messages.length-1].role === "assistant") {
-      console.log("assistant has sent a message", messages)
       setTextToBeSpoken(messages[messages.length-1].content)
     }
   }, [messages])

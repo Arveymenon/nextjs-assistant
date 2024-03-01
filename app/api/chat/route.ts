@@ -19,9 +19,11 @@ export async function POST(req: Request) {
     threadId: string | null;
     message: string;
   } = await req.json();
+  console.log("Input", input)
 
   // Create a thread if needed
   const threadId = input.threadId ?? (await openai.beta.threads.create({})).id;
+  console.log("Thread Id", threadId)
 
   // Add a message to the thread
   const createdMessage = await openai.beta.threads.messages.create(threadId, {
@@ -44,11 +46,40 @@ export async function POST(req: Request) {
       console.log("run prepared. Thread ID", threadId)
       async function waitForRun(run: Run) {
         // Poll for status change
+        console.log("Run in progress queued: Current Status", run.status)
         while (run.status === "queued" || run.status === "in_progress") {
           // delay for 500ms:
-          await new Promise((resolve) => setTimeout(resolve, 500));
-
+          console.log("Run in progress: Current Status", run.status)
+          await new Promise((resolve) => {
+            setTimeout(()=> {
+                console.log("Run in progress...", run.status)
+                resolve(true)
+              }, 500);
+          })
+          
           run = await openai.beta.threads.runs.retrieve(threadId!, run.id);
+        }
+
+        if(run.status === 'requires_action'){
+          console.log("Run in tools", 
+            // run['required_action']?['submit_tool_outputs']?['tool_calls']?["function"]
+            run.required_action?.submit_tool_outputs?.tool_calls
+          )
+          if(run.required_action?.submit_tool_outputs?.tool_calls[0].id){
+            const runOp = await openai.beta.threads.runs.submitToolOutputs(
+              threadId,
+              run.id,
+              {
+                tool_outputs: [
+                  {
+                    tool_call_id: run.required_action?.submit_tool_outputs?.tool_calls[0].id,
+                    output: `{"Nope not possible": "none"}`,
+                  }
+                ],
+              }
+            );
+            console.log("Action was submitted")
+          }
         }
 
         // Check the run status

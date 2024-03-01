@@ -11,7 +11,6 @@ type TextToSpeech = {
 const TextToSpeech = ({textToBeSpoken, setTextToBeSpoken}: TextToSpeech) => {
   const voices = window.speechSynthesis.getVoices();
   const selectedVoice = voices.find((voice) => voice.name === 'Samantha');
-  console.log(selectedVoice)
   const { ttsChildren, play } = useTts({
     children: textToBeSpoken,
     rate: 0.7,
