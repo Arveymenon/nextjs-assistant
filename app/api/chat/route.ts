@@ -11,6 +11,7 @@ const openai = new OpenAI({
 
 // IMPORTANT! Set the runtime to edge
 // export const runtime = "edge";
+const threads = openai.beta.threads;
 
 export async function POST(req: Request) {
   // Parse the request body
@@ -22,11 +23,11 @@ export async function POST(req: Request) {
   console.log(new Date(), "Input", input)
 
   // Create a thread if needed
-  const threadId = input.threadId ?? (await openai.beta.threads.create({})).id;
+  const threadId = input.threadId ?? (await threads.create({})).id;
   console.log(new Date(), "Thread Id", threadId)
 
   // Add a message to the thread
-  const createdMessage = await openai.beta.threads.messages.create(threadId, {
+  const createdMessage = await threads.messages.create(threadId, {
     role: "user",
     content: input.message,
   });
@@ -36,7 +37,7 @@ export async function POST(req: Request) {
     { threadId, messageId: createdMessage.id },
     async ({ threadId, sendMessage }) => {
       // Run the assistant on the thread
-      const run = await openai.beta.threads.runs.create(threadId, {
+      const run = await threads.runs.create(threadId, {
         assistant_id:
           process.env.ASSISTANT_ID ??
           (() => {
@@ -57,7 +58,7 @@ export async function POST(req: Request) {
               }, 500);
           })
           
-          run = await openai.beta.threads.runs.retrieve(threadId!, run.id);
+          // run = await threads.runs.retrieve(threadId!, run.id);
         }
 
         // only one function in this example, but you can have multiple
@@ -66,26 +67,40 @@ export async function POST(req: Request) {
         // }; 
 
         if(run.status === 'requires_action'){
-          const toolCalls = run.required_action?.submit_tool_outputs?.tool_calls
-          if(toolCalls){
-            for (const toolCall of toolCalls) {
-              // const functionName = toolCall.function.name;
-              const functionToCall = appointment_scheduler;
-              const functionArgs = toolCall.function.arguments;
-              const functionResponse = await functionToCall(
-                functionArgs
-              );
-              console.log(new Date(), "functionResponse", functionResponse)
-              // messages.push({
-              //   tool_call_id: toolCall.id,
-              //   role: "tool",
-              //   name: functionName,
-              //   content: functionResponse,
-              // }); // extend conversation with function response
-            }
+          const toolCall = run.required_action?.submit_tool_outputs?.tool_calls[0]
+          console.log("Tool Call", toolCall)
+          if(toolCall){
+            console.log("Tool Call function", toolCall)
+          //   for (const toolCall of toolCalls) {
+            // const functionName = toolCall.function.name;
+            const functionToCall = appointment_scheduler;
+            const functionArgs = toolCall.function.arguments;
+            const functionResponse = await functionToCall(
+              functionArgs
+            );
+            console.log(new Date(), "functionResponse", functionResponse)
+            // messages.push({
+            //   tool_call_id: toolCall.id,
+            //   role: "tool",
+            //   name: functionName,
+            //   content: functionResponse,
+            // }); // extend conversation with function response
+            let output = await threads.runs.submitToolOutputs(
+              threadId,
+              run.id,
+              {
+                tool_outputs: [
+                  {
+                    tool_call_id: toolCall.id,
+                    output: JSON.stringify(functionResponse),
+                  }
+                ],
+              }
+            );
+            console.log("Post submitToolOutputs", output.status)
           }
         }
-
+        
         // Check the run status
         if (
           run.status === "cancelled" ||
@@ -95,6 +110,15 @@ export async function POST(req: Request) {
         ) {
           throw new Error(run.status);
         }
+
+        while(run.status !== 'completed') {
+          await new Promise((resolve) => {
+            setTimeout(()=> {
+                console.log(new Date(), "Run in progress...", run.status)
+                resolve(true)
+              }, 2000);
+          })
+        }
       }
       console.log(new Date(), "Waiting for run")
       await waitForRun(run);
@@ -102,7 +126,7 @@ export async function POST(req: Request) {
       // Get new thread messages (after our message)
       console.log(new Date(), "Get new thread messages")
       const responseMessages = (
-        await openai.beta.threads.messages.list(threadId, {
+        await threads.messages.list(threadId, {
           after: createdMessage.id,
           order: "asc",
         })
@@ -110,7 +134,7 @@ export async function POST(req: Request) {
         
       console.log(new Date(), "Sending Response responseMessages", responseMessages)
       // Send the messages
-      
+
       for (const message of responseMessages) {
         console.log(new Date(), "------------------------ ResponseMessages ------------------------")
         console.log(new Date(), message.content)
