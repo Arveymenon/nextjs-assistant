@@ -1,4 +1,5 @@
 // app/api/assistant/route.ts
+import Database, { Patient, ScheduleType } from "@/lib/hooks/database";
 import { experimental_AssistantResponse } from "ai";
 import OpenAI from "openai";
 import { MessageContentText } from "openai/resources/beta/threads/messages/messages";
@@ -58,33 +59,21 @@ export async function POST(req: Request) {
               }, 500);
           })
           
-          // run = await threads.runs.retrieve(threadId!, run.id);
+          run = await threads.runs.retrieve(threadId!, run.id);
         }
-
-        // only one function in this example, but you can have multiple
-        // const availableFunctions = {
-        //   appointment_scheduler: appointment_scheduler,
-        // }; 
 
         if(run.status === 'requires_action'){
           const toolCall = run.required_action?.submit_tool_outputs?.tool_calls[0]
           console.log("Tool Call", toolCall)
           if(toolCall){
             console.log("Tool Call function", toolCall)
-          //   for (const toolCall of toolCalls) {
-            // const functionName = toolCall.function.name;
-            const functionToCall = appointment_scheduler;
-            const functionArgs = toolCall.function.arguments;
-            const functionResponse = await functionToCall(
-              functionArgs
+            const functionResponse = await appointment_scheduler(
+              toolCall.function.arguments
             );
             console.log(new Date(), "functionResponse", functionResponse)
-            // messages.push({
-            //   tool_call_id: toolCall.id,
-            //   role: "tool",
-            //   name: functionName,
-            //   content: functionResponse,
-            // }); // extend conversation with function response
+            
+            run = await threads.runs.retrieve(threadId!, run.id);
+
             let output = await threads.runs.submitToolOutputs(
               threadId,
               run.id,
@@ -97,6 +86,7 @@ export async function POST(req: Request) {
                 ],
               }
             );
+            run = await threads.runs.retrieve(threadId!, run.id);
             console.log("Post submitToolOutputs", output.status)
           }
         }
@@ -118,11 +108,12 @@ export async function POST(req: Request) {
                 resolve(true)
               }, 2000);
           })
+          run = await threads.runs.retrieve(threadId!, run.id);
         }
       }
       console.log(new Date(), "Waiting for run")
       await waitForRun(run);
-      
+
       // Get new thread messages (after our message)
       console.log(new Date(), "Get new thread messages")
       const responseMessages = (
@@ -150,7 +141,27 @@ export async function POST(req: Request) {
   );
 }
 
-function appointment_scheduler(args: string) {
-  console.log("appointment_scheduler", args)
-  return {success: false}
+async function appointment_scheduler(args: string) {
+  const patient: Patient = JSON.parse(args)
+  console.log(patient)
+  patient.schedule_start_datetime = patient.schedule_start_datetime+'Z'
+  patient.schedule_end_datetime = patient.schedule_end_datetime+'Z'
+
+  debugger;
+  console.log("schedule_type", patient.schedule_type)
+  console.log("ScheduleType.set", ScheduleType.set)
+  let response;
+  switch (patient.schedule_type) {
+    case(ScheduleType.set): {
+      response = await Database.set(patient)
+    }
+    case(ScheduleType.update): {
+      response = await Database.del(patient)
+    }
+    case(ScheduleType.delete): {
+      response = await Database.update(patient)
+    }
+  }
+  
+  return response;
 }
