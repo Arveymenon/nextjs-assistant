@@ -1,4 +1,4 @@
-import { sql } from "@vercel/postgres";
+import { db, sql } from "@vercel/postgres";
 
 export enum ScheduleType {
     'set' = 'set', 
@@ -20,13 +20,18 @@ const Database = () => {
     const set = async (patient: Patient) => {
         debugger;
         let res = await overlapExists(patient.schedule_start_datetime, patient.schedule_end_datetime)
+        console.log(new Date(), "overlapExists", res)
+        let response;
         if(!res) {
             await createEntry(patient)
-            return {success: true}
+            console.log(new Date(), "createEntry", "success")
+            response = {success: true}
         } else {
             let schedule = await daySchedule(patient)
-            return {success: false, schedule}
+            console.log(new Date(), "schedule", schedule)
+            response = {success: false, schedule}
         }
+        return response;
     }
     const update = async (patient: Patient) => {
         let res = await overlapExists(patient.schedule_start_datetime, patient.schedule_end_datetime)
@@ -46,41 +51,60 @@ const Database = () => {
     }
 
     const overlapExists = async (new_startdatetime: string, new_enddatetime: string) => {
-        const row = await sql`SELECT * FROM schedule WHERE  (
-                (startdatetime <= ${new_startdatetime} AND ${new_startdatetime} < enddatetime)
-                OR
-                (startdatetime < ${new_enddatetime} AND ${new_enddatetime} <= enddatetime)
+        try {
+            const row = await sql`
+            SELECT *
+            FROM schedule
+            WHERE
+                (
+                    (startdatetime <= ${new_startdatetime} AND ${new_startdatetime} < enddatetime)
+                    OR
+                    (startdatetime < ${new_enddatetime} AND ${new_enddatetime} <= enddatetime)
                 )
                 OR
                 (
-                (${new_startdatetime} <= startdatetime AND startdatetime < ${new_enddatetime})
-                OR
-                (${new_startdatetime} < enddatetime AND enddatetime <= ${new_enddatetime})
-            );`
+                    (${new_startdatetime} <= startdatetime AND startdatetime < ${new_enddatetime})
+                    OR
+                    (${new_startdatetime} < enddatetime AND enddatetime <= ${new_enddatetime})
+                )`;
+
+            return row.rowCount ? true : false;
+        } catch (e) {errorHandler}
         
-        return row.rowCount ? true : false;
     }
 
     const createEntry = async (patient: Patient) => {
-        await sql`INSERT INTO schedule (name, contact_number, startdatetime, enddatetime)
-            VALUES (${patient.name}, ${patient.contact}, ${patient.schedule_start_datetime}, ${patient.schedule_end_datetime})
-            RETURNING *;`
-        return true;
+        try {
+            await sql`
+                INSERT INTO 
+                schedule (name, contact_number, startdatetime, enddatetime)
+                VALUES (${patient.name}, ${patient.contact}, ${patient.schedule_start_datetime}, ${patient.schedule_end_datetime})
+                RETURNING *;`
+            return true;
+        } catch (e) {errorHandler}
     }
 
     const deleteEntry = async (patientName: string) => {
         try {
-            await sql`DELETE FROM schedule WHERE name = ${patientName}`;
+            await sql`
+                DELETE 
+                FROM schedule 
+                WHERE name = ${patientName};`;
             return true;
         } catch (e) {errorHandler}
 
     }
 
     const daySchedule = async (patient: Patient) => {
-        const startDate = new Date(patient.schedule_end_datetime).toLocaleDateString();
-        let {rows} = await sql`SELECT * FROM schedule WHERE startdatetime = ${startDate};`
-
-        return rows
+        const startDate = new Date("2023-09-28T00:00:00").toLocaleDateString();
+        try {
+            let {rows} = await sql`
+                SELECT * 
+                FROM schedule 
+                WHERE DATE(startdatetime) = '${startDate}';`
+    
+            return rows
+        } catch (e) {errorHandler}
     }
 
     return {set, update, del}

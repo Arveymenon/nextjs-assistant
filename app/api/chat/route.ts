@@ -4,6 +4,10 @@ import { experimental_AssistantResponse } from "ai";
 import OpenAI from "openai";
 import { MessageContentText } from "openai/resources/beta/threads/messages/messages";
 import { Run } from "openai/resources/beta/threads/runs/runs";
+import createMessage, { Input } from "./helpers/createMessage";
+import  { createThreadRun, queuedOrInprogressRun } from "./helpers/threadRun";
+import actionHandler from "./helpers/actionHandler";
+import assistantResponse from "./helpers/assistantResponse";
 
 // Create an OpenAI API client (that's edge friendly!)
 const openai = new OpenAI({
@@ -17,79 +21,29 @@ const threads = openai.beta.threads;
 export async function POST(req: Request) {
   // Parse the request body
   console.log(new Date(), "Request Initiated")
-  const input: {
-    threadId: string | null;
-    message: string;
-  } = await req.json();
+  const input: Input = await req.json();
   console.log(new Date(), "Input", input)
-
+  debugger;
   // Create a thread if needed
   const threadId = input.threadId ?? (await threads.create({})).id;
   console.log(new Date(), "Thread Id", threadId)
 
   // Add a message to the thread
-  const createdMessage = await threads.messages.create(threadId, {
-    role: "user",
-    content: input.message,
-  });
+  const createdMessage = await createMessage(threads, threadId, input)
   console.log(new Date(), "Created message to be sent", input.message)
-
+  
   return experimental_AssistantResponse(
     { threadId, messageId: createdMessage.id },
     async ({ threadId, sendMessage }) => {
       // Run the assistant on the thread
-      const run = await threads.runs.create(threadId, {
-        assistant_id:
-          process.env.ASSISTANT_ID ??
-          (() => {
-            throw new Error("ASSISTANT_ID is not set");
-          })(),
-      });
-      console.log(new Date(), "run prepared. Thread ID", threadId)
+      const run = await createThreadRun(threads, threadId)
+      console.log(new Date(),run.status, "run prepared. Thread ID", threadId)
       async function waitForRun(run: Run) {
         // Poll for status change
-        console.log(new Date(), "Run in progress queued: Current Status", run.status)
-        while (run.status === "queued" || run.status === "in_progress") {
-          // delay for 500ms:
-          console.log(new Date(), "Run in progress: Current Status", run.status)
-          await new Promise((resolve) => {
-            setTimeout(()=> {
-                console.log(new Date(), "Run in progress...", run.status)
-                resolve(true)
-              }, 500);
-          })
-          
-          run = await threads.runs.retrieve(threadId!, run.id);
-        }
+        console.log(new Date(),run.status, "Run in progress queued: Current Status", run.status)
+        run = await queuedOrInprogressRun(run, threads, threadId)
 
-        if(run.status === 'requires_action'){
-          const toolCall = run.required_action?.submit_tool_outputs?.tool_calls[0]
-          console.log("Tool Call", toolCall)
-          if(toolCall){
-            console.log("Tool Call function", toolCall)
-            const functionResponse = await appointment_scheduler(
-              toolCall.function.arguments
-            );
-            console.log(new Date(), "functionResponse", functionResponse)
-            
-            run = await threads.runs.retrieve(threadId!, run.id);
-
-            let output = await threads.runs.submitToolOutputs(
-              threadId,
-              run.id,
-              {
-                tool_outputs: [
-                  {
-                    tool_call_id: toolCall.id,
-                    output: JSON.stringify(functionResponse),
-                  }
-                ],
-              }
-            );
-            run = await threads.runs.retrieve(threadId!, run.id);
-            console.log("Post submitToolOutputs", output.status)
-          }
-        }
+        run = await actionHandler(run, threads, threadId)
         
         // Check the run status
         if (
@@ -104,64 +58,19 @@ export async function POST(req: Request) {
         while(run.status !== 'completed') {
           await new Promise((resolve) => {
             setTimeout(()=> {
-                console.log(new Date(), "Run in progress...", run.status)
+                console.log(new Date(),run.status, "Run in progress 2 ...", run.status)
                 resolve(true)
               }, 2000);
           })
           run = await threads.runs.retrieve(threadId!, run.id);
         }
       }
-      console.log(new Date(), "Waiting for run")
+      console.log(new Date(),run.status, "Waiting for run")
       await waitForRun(run);
 
       // Get new thread messages (after our message)
-      console.log(new Date(), "Get new thread messages")
-      const responseMessages = (
-        await threads.messages.list(threadId, {
-          after: createdMessage.id,
-          order: "asc",
-        })
-      ).data;
-        
-      console.log(new Date(), "Sending Response responseMessages", responseMessages)
-      // Send the messages
-
-      for (const message of responseMessages) {
-        console.log(new Date(), "------------------------ ResponseMessages ------------------------")
-        console.log(new Date(), message.content)
-        sendMessage({
-          id: message.id,
-          role: "assistant",
-          content: message.content.filter(
-            (content) => content.type === "text"
-          ) as Array<MessageContentText>,
-        });
-      }
+      console.log(new Date(),run.status, "Get new thread messages")
+      await assistantResponse(threads, threadId, createdMessage, sendMessage)
     }
   );
-}
-
-async function appointment_scheduler(args: string) {
-  const patient: Patient = JSON.parse(args)
-  console.log(patient)
-  patient.schedule_start_datetime = patient.schedule_start_datetime+'Z'
-  patient.schedule_end_datetime = patient.schedule_end_datetime+'Z'
-
-  debugger;
-  console.log("schedule_type", patient.schedule_type)
-  console.log("ScheduleType.set", ScheduleType.set)
-  let response;
-  switch (patient.schedule_type) {
-    case(ScheduleType.set): {
-      response = await Database.set(patient)
-    }
-    case(ScheduleType.update): {
-      response = await Database.del(patient)
-    }
-    case(ScheduleType.delete): {
-      response = await Database.update(patient)
-    }
-  }
-  
-  return response;
 }
