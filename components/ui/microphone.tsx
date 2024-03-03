@@ -34,7 +34,7 @@ const Microphone = ({onSubmit, disabled}: MicrophoneProps) => {
                     onClick={clickHandler}
                     >
                 <IconMic />
-                // <IconArrowElbow /> 
+                <IconArrowElbow /> 
                 <span className="sr-only">Send message</span>
                 </Button>
             
