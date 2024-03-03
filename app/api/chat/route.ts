@@ -23,7 +23,6 @@ export async function POST(req: Request) {
   console.log(new Date(), "Request Initiated")
   const input: Input = await req.json();
   console.log(new Date(), "Input", input)
-  debugger;
   // Create a thread if needed
   const threadId = input.threadId ?? (await threads.create({})).id;
   console.log(new Date(), "Thread Id", threadId)
@@ -31,7 +30,7 @@ export async function POST(req: Request) {
   // Add a message to the thread
   const createdMessage = await createMessage(threads, threadId, input)
   console.log(new Date(), "Created message to be sent", input.message)
-  
+
   return experimental_AssistantResponse(
     { threadId, messageId: createdMessage.id },
     async ({ threadId, sendMessage }) => {

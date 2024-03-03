@@ -33,6 +33,7 @@ export function PromptForm({
   const router = useRouter()
 
   const [ microphoneUsed, setMicrophoneUsed ] = React.useState<boolean>(false)
+  const [recording, setRecording] = React.useState<boolean>(false)
 
   React.useEffect(() => {
     if (inputRef.current) {
@@ -73,7 +74,7 @@ export function PromptForm({
             setInput(e.target.value)
             handleInputChange(e)
           }}
-          placeholder="Send a message"
+          placeholder={recording ? "Recording...": "Send a message"}
           spellCheck={false}
           className="min-h-[60px] w-full resize-none bg-transparent px-4 py-[1.3rem] focus-within:outline-none sm:text-sm"
         />
@@ -81,7 +82,7 @@ export function PromptForm({
         <Tooltip>
           <TooltipTrigger asChild>
               <Microphone
-                  disabled={isLoading} onSubmit={(text)=> {
+                  disabled={isLoading} recording={recording} setRecording={setRecording} onSubmit={(text)=> {
                   setInput(text)
                   setMicrophoneUsed(true)
                 }}/>

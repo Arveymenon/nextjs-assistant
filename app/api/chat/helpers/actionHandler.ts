@@ -51,7 +51,6 @@ async function appointment_scheduler(args: string, run: Run, threads: OpenAI.Bet
     console.log(patient)
     patient.schedule_start_datetime = patient.schedule_start_datetime+'Z'
     patient.schedule_end_datetime = patient.schedule_end_datetime+'Z'
-    debugger;
 
     console.log(new Date(), run.status, "schedule_type", patient.schedule_type)
     let response;
@@ -67,7 +66,6 @@ async function appointment_scheduler(args: string, run: Run, threads: OpenAI.Bet
       }
     }
     console.log(new Date(), run.status, response)
-    debugger;
     run = await threads.runs.retrieve(threadId!, run.id);
   
     return response;

@@ -2,24 +2,30 @@
 
 import { useRecordVoice } from "@/lib/hooks/speech-to-text";
 import { IconArrowElbow, IconMic } from "./icons";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 
 type MicrophoneProps = {
     onSubmit: (x: string) => void
-    disabled: boolean
+    disabled: boolean,
+    recording: boolean,
+    setRecording: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-const Microphone = ({onSubmit, disabled}: MicrophoneProps) => {
+const Microphone = ({onSubmit, disabled, recording, setRecording}: MicrophoneProps) => {
     const { startRecording, stopRecording, text, setText: microPhoneText } = useRecordVoice();
     const submitButtonRef = React.useRef<HTMLButtonElement>(null)
-    const [recording, setRecording] = useState<boolean>(false)
+
+    useEffect(()=>{
+        console.log(new Date(), recording)
+    }, [recording])
+
     if(text) {
         onSubmit(text)
         microPhoneText("")
     }
 
-    const clickHandler = () => {
+    const tapHandler = () => {
         recording ? stopRecording() : startRecording()
         setRecording(!recording)
     }
@@ -31,10 +37,10 @@ const Microphone = ({onSubmit, disabled}: MicrophoneProps) => {
                     className="prevent-select"
                     disabled={disabled}
                     size="icon"
-                    onMouseDown={startRecording}
-                    onMouseUp={stopRecording}
-                    onTouchStart={startRecording}
-                    onTouchEnd={stopRecording}
+                    onMouseDown={tapHandler}
+                    onMouseUp={tapHandler}
+                    onTouchStart={tapHandler}
+                    onTouchEnd={tapHandler}
                     >
                 <IconMic />
                 <span className="sr-only">Send message</span>

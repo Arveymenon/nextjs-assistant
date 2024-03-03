@@ -18,7 +18,6 @@ const Database = () => {
     // 1. Create entry
     // 1. Check if slot is already taken
     const set = async (patient: Patient) => {
-        debugger;
         let res = await overlapExists(patient.schedule_start_datetime, patient.schedule_end_datetime)
         console.log(new Date(), "overlapExists", res)
         let response;
