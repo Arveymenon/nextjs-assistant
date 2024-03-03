@@ -1,14 +1,16 @@
 "use client";
 
 import { useRecordVoice } from "@/lib/hooks/speech-to-text";
-import { IconChevronUpDown } from "./icons";
-import React, { useRef } from "react";
+import { IconArrowElbow, IconMic } from "./icons";
+import React from "react";
+import { Button } from "@/components/ui/button";
 
 type MicrophoneProps = {
     onSubmit: (x: string) => void
+    disabled: boolean
 }
 
-const Microphone = ({onSubmit}: MicrophoneProps) => {
+const Microphone = ({onSubmit, disabled}: MicrophoneProps) => {
     const { startRecording, stopRecording, text, setText: microPhoneText } = useRecordVoice();
     const submitButtonRef = React.useRef<HTMLButtonElement>(null)
 
@@ -18,19 +20,19 @@ const Microphone = ({onSubmit}: MicrophoneProps) => {
     }
 
     return (
-        <>
-            <div className="flex flex-col justify-center items-center">
-                <button
-                onMouseDown={startRecording}
-                onMouseUp={stopRecording}
-                onTouchStart={startRecording}
-                onTouchEnd={stopRecording}
-                className="border-none bg-transparent w-10"
-                >
-                <IconChevronUpDown />
-                </button>
-            </div>
-        </>
+            <Button
+                    disabled={disabled}
+                    size="icon"
+                    type="submit"
+                    onMouseDown={startRecording}
+                    onMouseUp={stopRecording}
+                    onTouchStart={startRecording}
+                    onTouchEnd={stopRecording}
+                    >
+                <IconMic />
+                {/* <IconArrowElbow /> */}
+                <span className="sr-only">Send message</span>
+            </Button>
     );
   };
   
