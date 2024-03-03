@@ -25,12 +25,12 @@ const exampleMessages = [
 ]
 
 const titleText = "Hi! My Name's Juliana. How can I help you?"
-const subText = "Can I help you with scheduling an you appointment with our Doctor?"
+const subText = "Tap the mic icon once to record your message assistant. Tap it again to send your message"
 
 
 export function EmptyScreen({ setInput }: Pick<UseChatHelpers, 'setInput'>) {
 
-  const [ textToBeSpoken, setTextToBeSpoken ] = useState(subText)
+  const [ textToBeSpoken, setTextToBeSpoken ] = useState(titleText)
 
   return (
     <div className="mx-auto max-w-2xl px-4">
