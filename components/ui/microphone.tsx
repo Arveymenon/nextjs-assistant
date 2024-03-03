@@ -31,10 +31,12 @@ const Microphone = ({onSubmit, disabled}: MicrophoneProps) => {
                     className="prevent-select"
                     disabled={disabled}
                     size="icon"
-                    onClick={clickHandler}
+                    onMouseDown={startRecording}
+                    onMouseUp={stopRecording}
+                    onTouchStart={startRecording}
+                    onTouchEnd={stopRecording}
                     >
                 <IconMic />
-                <IconArrowElbow /> 
                 <span className="sr-only">Send message</span>
                 </Button>
             
