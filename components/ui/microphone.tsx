@@ -26,8 +26,9 @@ const Microphone = ({onSubmit, disabled}: MicrophoneProps) => {
 
     return (
         <>
-            {/* 
+            
                 <Button
+                    className="prevent-select"
                     disabled={disabled}
                     size="icon"
                     onClick={clickHandler}
@@ -36,14 +37,14 @@ const Microphone = ({onSubmit, disabled}: MicrophoneProps) => {
                 // <IconArrowElbow /> 
                 <span className="sr-only">Send message</span>
                 </Button>
-             */}
-            <button
+            
+            {/* <button
                 className="prevent-select"
                 disabled={disabled}
                 onClick={clickHandler}
                 >
                 Mic Button
-            </button>
+            </button> */}
         </>
     );
   };
