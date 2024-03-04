@@ -1,4 +1,5 @@
-import database, { Patient, ScheduleType } from "@/lib/hooks/database";
+import availableTimeSlotDatabase from "@/lib/hooks/availableTimeSlotDatabase";
+import database, { Patient, ScheduleType } from "@/lib/hooks/scheduletDatabase";
 import { QueryResultRow } from "@vercel/postgres";
 import OpenAI from "openai";
 import { Run } from "openai/resources/beta/threads/runs/runs";
@@ -14,15 +15,25 @@ export type appointmentScheduler = Promise<{
 const actionHandler = async (run: Run, threads: OpenAI.Beta.Threads, threadId: string) => {
     if(run.status === 'requires_action'){
         const toolCall = run.required_action?.submit_tool_outputs?.tool_calls[0]
-        console.log("Tool Call", toolCall)
         if(toolCall){
-          console.log("Tool Call function", toolCall)
-          const functionResponse = await appointment_scheduler(
-            toolCall.function.arguments,
-            run,
-            threads,
-            threadId
-          );
+          console.log("Tool Call", toolCall)
+          let functionResponse;
+          if(toolCall.function.name === "appointment_scheduler") {
+            functionResponse = await appointment_scheduler(
+              toolCall.function.arguments,
+              run,
+              threads,
+              threadId
+            );
+          }
+          if(toolCall.function.name === "available_slot") {
+            functionResponse = await available_slot(
+              toolCall.function.arguments,
+              run,
+              threads,
+              threadId
+            );
+          }
           console.log(new Date(), "functionResponse", functionResponse)
           
           run = await threads.runs.retrieve(threadId!, run.id);
@@ -49,25 +60,33 @@ const actionHandler = async (run: Run, threads: OpenAI.Beta.Threads, threadId: s
 async function appointment_scheduler(args: string, run: Run, threads: OpenAI.Beta.Threads, threadId: string) {
     const patient: Patient = JSON.parse(args)
     console.log(patient)
-    patient.schedule_start_datetime = patient.schedule_start_datetime+'Z'
-    patient.schedule_end_datetime = patient.schedule_end_datetime+'Z'
+    patient.schedule_start_datetime = new Date(patient.schedule_start_datetime).toISOString()
+    patient.schedule_end_datetime = new Date(patient.schedule_end_datetime).toISOString()
 
     console.log(new Date(), run.status, "schedule_type", patient.schedule_type)
     let response;
-    switch (patient.schedule_type) {
-      case(ScheduleType.set): {
-        response = await database.set(patient)
-      }
-      case(ScheduleType.delete): {
-        response = await database.del(patient)
-      }
-      case(ScheduleType.update): {
-        response = await database.update(patient)
-      }
+    if(patient.schedule_type == ScheduleType.set) {
+      response = await database.set(patient)
     }
+    if(patient.schedule_type == ScheduleType.delete) {
+      response = await database.del(patient)
+    }
+    if(patient.schedule_type == ScheduleType.update) {
+      response = await database.update(patient)
+    }
+
     console.log(new Date(), run.status, response)
     run = await threads.runs.retrieve(threadId!, run.id);
   
+    return response;
+  }
+
+  async function available_slot(args: string, run: Run, threads: OpenAI.Beta.Threads, threadId: string){
+    let response = await availableTimeSlotDatabase.getTimeSlot()
+    run = await threads.runs.retrieve(threadId!, run.id);
+    if(!response || response.length == 0){
+      return {"error": "doctor is not free"}
+    }
     return response;
   }
 

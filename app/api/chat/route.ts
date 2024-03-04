@@ -1,8 +1,5 @@
-// app/api/assistant/route.ts
-import Database, { Patient, ScheduleType } from "@/lib/hooks/database";
 import { experimental_AssistantResponse } from "ai";
 import OpenAI from "openai";
-import { MessageContentText } from "openai/resources/beta/threads/messages/messages";
 import { Run } from "openai/resources/beta/threads/runs/runs";
 import createMessage, { Input } from "./helpers/createMessage";
 import  { createThreadRun, queuedOrInprogressRun } from "./helpers/threadRun";

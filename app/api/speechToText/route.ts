@@ -10,6 +10,7 @@ const openai = new OpenAI({
 });
 
 export async function POST(req: Request, response: Response) {
+  console.log(new Date(), "speechToText api called")
   const body = await req.json();
   
   const base64Audio = body.audio;
