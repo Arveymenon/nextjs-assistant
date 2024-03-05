@@ -25,7 +25,7 @@ let availableTimeSlotDB = () => {
     let getTimeSlot = async () => {
         debugger;
         try {
-            const { rows } = await sql`SELECT startdatetime, enddatetime
+            const { rows } = await sql`SELECT id, startdatetime, enddatetime
             FROM timeslot`
 
             return rows;

@@ -1,5 +1,5 @@
-import availableTimeSlotDatabase from "@/lib/hooks/availableTimeSlotDatabase";
-import database, { Patient, ScheduleType } from "@/lib/hooks/scheduletDatabase";
+import availableTimeSlotDatabase from "@/lib/Database/availableTimeSlotDatabase";
+import database, { Patient, ScheduleType } from "@/lib/Database/scheduletDatabase";
 import { QueryResultRow } from "@vercel/postgres";
 import OpenAI from "openai";
 import { Run } from "openai/resources/beta/threads/runs/runs";

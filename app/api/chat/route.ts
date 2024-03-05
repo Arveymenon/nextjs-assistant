@@ -39,8 +39,11 @@ export async function POST(req: Request) {
         console.log(new Date(),run.status, "Run in progress or queued: Current Status", run.status)
         run = await queuedOrInprogressRun(run, threads, threadId)
         console.log(new Date(),run.status, "Run in progress or queue completed: Current Status", run.status)
-
+        
         run = await actionHandler(run, threads, threadId)
+        
+        run = await queuedOrInprogressRun(run, threads, threadId)
+        console.log(new Date(),run.status, "Run in progress or queue completed: Current Status", run.status)
         
         // Check the run status
         if (

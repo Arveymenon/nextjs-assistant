@@ -1,4 +1,4 @@
-import availableTimeSlotDatabase from "@/lib/hooks/availableTimeSlotDatabase";
+import availableTimeSlotDatabase from "@/lib/Database/availableTimeSlotDatabase";
 import { NextResponse } from "next/server";
 
 // export async function POST(req: Request, response: Response) {
@@ -14,17 +14,22 @@ export async function POST(req: Request, response: Response) {
     console.log(new Date(), "timeslot POST api called")
     debugger;
     try {
-        const body = await req.json();
-        let startDateTime = body.schedule_start_datetime;
-        let endDateTime = body.schedule_end_datetime;
-
         let response;
-        if(body.type == 'get-slot')
-            response = await availableTimeSlotDatabase.getTimeSlot()
-        if(body.type == 'add-slot')
-            response = await availableTimeSlotDatabase.addTimeSlot(startDateTime, endDateTime)
+        if(req) {
+            const body = await req.json();
 
-        return NextResponse.json(response);
+            if(body.type == 'add-slot') {
+                let startDateTime = body.schedule_start_datetime;
+                let endDateTime = body.schedule_end_datetime;
+                response = await availableTimeSlotDatabase.addTimeSlot(startDateTime, endDateTime)
+                return NextResponse.json(response);
+            } 
+            if(body.type == 'get-slot') {
+                response = await availableTimeSlotDatabase.getTimeSlot()
+                return NextResponse.json(response);
+            }
+        }
+
     } catch(e) {
         console.error("Error processing timeslot:", e);
         return NextResponse.error();

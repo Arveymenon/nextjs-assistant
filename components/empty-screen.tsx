@@ -25,7 +25,7 @@ const exampleMessages = [
 ]
 
 const titleText = "Hi! My Name's Juliana. How can I help you?"
-const subText = "Tap the mic icon once to record your message assistant. Tap it again to send your message"
+const subText = "Hold down the mic icon to talk to our assistant."
 
 
 export function EmptyScreen({ setInput }: Pick<UseChatHelpers, 'setInput'>) {
