@@ -36,8 +36,9 @@ export async function POST(req: Request) {
       console.log(new Date(),run.status, "run prepared. Thread ID", threadId)
       async function waitForRun(run: Run) {
         // Poll for status change
-        console.log(new Date(),run.status, "Run in progress queued: Current Status", run.status)
+        console.log(new Date(),run.status, "Run in progress or queued: Current Status", run.status)
         run = await queuedOrInprogressRun(run, threads, threadId)
+        console.log(new Date(),run.status, "Run in progress or queue completed: Current Status", run.status)
 
         run = await actionHandler(run, threads, threadId)
         
@@ -58,8 +59,10 @@ export async function POST(req: Request) {
                 resolve(true)
               }, 2000);
           })
+          console.log(new Date(),run.status, "Run not completed: Current Status", run.status)
           run = await threads.runs.retrieve(threadId!, run.id);
         }
+        console.log(new Date(),run.status, "Run Completed")
       }
       console.log(new Date(),run.status, "Waiting for run")
       await waitForRun(run);
