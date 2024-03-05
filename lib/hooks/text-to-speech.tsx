@@ -8,7 +8,7 @@ type TextToSpeech = {
 
 
 
-const TextToSpeech = async ({textToBeSpoken, setTextToBeSpoken}: TextToSpeech) => {
+const TextToSpeech = ({textToBeSpoken, setTextToBeSpoken}: TextToSpeech) => {
   const voices = window.speechSynthesis.getVoices();
   const selectedVoice = voices.find((voice) => voice.name === 'Samantha');
   const { ttsChildren, play } = useTts({
