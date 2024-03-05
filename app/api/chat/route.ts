@@ -17,9 +17,8 @@ const threads = openai.beta.threads;
 
 export async function POST(req: Request) {
   // Parse the request body
-  console.log(new Date(), "Request Initiated")
   const input: Input = await req.json();
-  console.log(new Date(), "Input", input)
+  console.log(new Date(), "Request Initiated Input", input)
   // Create a thread if needed
   const threadId = input.threadId ?? (await threads.create({})).id;
   console.log(new Date(), "Thread Id", threadId)
@@ -44,7 +43,7 @@ export async function POST(req: Request) {
         
         run = await queuedOrInprogressRun(run, threads, threadId)
         console.log(new Date(),run.status, "Run in progress or queue completed: Current Status", run.status)
-        
+
         // Check the run status
         if (
           run.status === "cancelled" ||

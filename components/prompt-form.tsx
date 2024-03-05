@@ -63,7 +63,7 @@ export function PromptForm({
       onSubmit={formSubmit}
       ref={formRef}
     >
-      <div className="relative flex flex-col w-full overflow-hidden max-h-60 grow bg-background sm:rounded-md sm:border pr-12">
+      <div className="relative flex flex-col w-full overflow-hidden max-h-60 grow bg-background sm:rounded-md sm:border pr-27">
         <Textarea
           ref={inputRef}
           tabIndex={0}

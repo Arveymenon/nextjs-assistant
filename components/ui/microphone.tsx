@@ -14,11 +14,6 @@ type MicrophoneProps = {
 
 const Microphone = ({onSubmit, disabled, recording, setRecording}: MicrophoneProps) => {
     const { startRecording, stopRecording, text, setText: microPhoneText } = useRecordVoice();
-    const submitButtonRef = React.useRef<HTMLButtonElement>(null)
-
-    useEffect(()=>{
-        console.log(new Date(), recording)
-    }, [recording])
 
     if(text) {
         onSubmit(text)
@@ -32,27 +27,18 @@ const Microphone = ({onSubmit, disabled, recording, setRecording}: MicrophonePro
 
     return (
         <>
-            
-                <Button
-                    className="prevent-select"
-                    disabled={disabled}
-                    size="icon"
-                    onMouseDown={tapHandler}
-                    onMouseUp={tapHandler}
-                    onTouchStart={tapHandler}
-                    onTouchEnd={tapHandler}
-                    >
-                <IconMic />
-                <span className="sr-only">Send message</span>
-                </Button>
-            
-            {/* <button
+            <Button
                 className="prevent-select"
                 disabled={disabled}
-                onClick={clickHandler}
+                size="icon"
+                onMouseDown={tapHandler}
+                onMouseUp={tapHandler}
+                onTouchStart={tapHandler}
+                onTouchEnd={tapHandler}
                 >
-                Mic Button
-            </button> */}
+            <IconMic />
+            <span className="sr-only">Send message</span>
+            </Button>
         </>
     );
   };

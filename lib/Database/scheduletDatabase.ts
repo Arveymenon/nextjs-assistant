@@ -20,7 +20,6 @@ const Database = () => {
     const set = async (patient: Patient) => {
         try {
             await createEntry(patient)
-            console.log(new Date(), "createEntry", "success")
             return {success: true}
         } catch (e) {errorHandler}
     }

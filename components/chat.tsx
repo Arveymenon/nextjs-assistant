@@ -62,7 +62,7 @@ export function Chat({ initialMessages, className }: ChatProps) {
             <ChatScrollAnchor trackVisibility={status === 'in_progress'} />
           </>
         ) : (
-          <EmptyScreen setInput={setInput} />
+          <EmptyScreen />
         )}
       </div>
       {textToBeSpoken && 
