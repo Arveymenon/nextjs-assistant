@@ -4,7 +4,7 @@ import { sql } from "@vercel/postgres"
 let availableTimeSlotDB = () => {
 
     let addTimeSlot = async (startTime: string, endtime: string) => {
-        debugger;
+        ;
         try {
             const { rows } = await sql`INSERT INTO timeslot (startdatetime, enddatetime)
             VALUES (${startTime}, ${endtime})
@@ -14,16 +14,16 @@ let availableTimeSlotDB = () => {
     }
 
     let removeTimeSlot = async (id: string) => {
+        let slot_id = parseInt(id);
+        ;
         try {
             const { rows } = await sql`DELETE FROM timeslot
-            WHERE id = ${id};
-            RETURNING *;`
+            WHERE id = ${slot_id};`
             return rows;
         } catch (e) {errorHandler}
     }
 
     let getTimeSlot = async () => {
-        debugger;
         try {
             const { rows } = await sql`SELECT id, startdatetime, enddatetime
             FROM timeslot`

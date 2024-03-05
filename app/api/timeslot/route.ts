@@ -12,7 +12,6 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request, response: Response) {
     console.log(new Date(), "timeslot POST api called")
-    debugger;
     try {
         let response;
         if(req) {
@@ -39,11 +38,13 @@ export async function POST(req: Request, response: Response) {
 export async function DELETE(req: Request, response: Response) {
     console.log(new Date(), "timeslot DELETE api called")
     try {
+        ;
+        console.log("Req",req)
         const body = await req.json();
+        console.log(new Date(), "BODY", body)
         let id = body.id;
 
-        let response;
-            response = await availableTimeSlotDatabase.removeTimeSlot(id)
+        let response = await availableTimeSlotDatabase.removeTimeSlot(id)
 
         return NextResponse.json(response);
     } catch(e) {

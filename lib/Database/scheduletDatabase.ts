@@ -40,7 +40,7 @@ const Database = () => {
     }
 
     const createEntry = async (patient: Patient) => {
-        debugger;
+        ;
         try {
             await sql`
                 INSERT INTO 
