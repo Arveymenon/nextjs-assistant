@@ -35,15 +35,15 @@ export async function POST(req: Request) {
       console.log(new Date(),run.status, "run prepared. Thread ID", threadId)
       async function waitForRun(run: Run) {
         // Poll for status change
-        console.log(new Date(),run.status, "Run in progress or queued: Current Status", run.status)
-        run = await queuedOrInprogressRun(run, threads, threadId)
-        console.log(new Date(),run.status, "Run in progress or queue completed: Current Status", run.status)
-        
-        run = await actionHandler(run, threads, threadId)
-        
-        run = await queuedOrInprogressRun(run, threads, threadId)
-        console.log(new Date(),run.status, "Run in progress or queue completed: Current Status", run.status)
 
+        while (run.status === "queued" || run.status === "in_progress" || run.status === "requires_action") {
+          console.log(new Date(),run.status, "Run in progress or queued: Current Status", run.status)
+          run = await queuedOrInprogressRun(run, threads, threadId)
+          console.log(new Date(),run.status, "Run in progress or queue completed: Current Status", run.status)
+          
+          
+          run = await actionHandler(run, threads, threadId)
+        }
         // Check the run status
         if (
           run.status === "cancelled" ||

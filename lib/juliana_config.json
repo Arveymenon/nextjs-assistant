@@ -53,6 +53,19 @@
           "schedule_start_date"
         ]
       }
+    }, {
+      "name": "current_timestamp",
+      "description": "Get today's date current_timestamp",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Today's timestamp"
+          }
+        },
+        "required": []
+      }
     }],
     "description": "Set, Update or Delete Apppointments"
 }

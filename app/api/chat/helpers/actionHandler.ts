@@ -13,12 +13,13 @@ export type appointmentScheduler = Promise<{
 }>
 
 const actionHandler = async (run: Run, threads: OpenAI.Beta.Threads, threadId: string) => {
-    if(run.status === 'requires_action'){
-        const toolCall = run.required_action?.submit_tool_outputs?.tool_calls[0]
-        if(toolCall){
+    while(run.status === 'requires_action'){
+        // const toolCall = [0]
+        const toolCalls = run.required_action?.submit_tool_outputs?.tool_calls || []
+        for(let toolCall of toolCalls){
           console.log("Tool Call", toolCall)
           let functionResponse;
-          if(toolCall.function.name === "appointment_scheduler") {
+          if (toolCall.function.name === "appointment_scheduler") {
             functionResponse = await appointment_scheduler(
               toolCall.function.arguments,
               run,
@@ -26,13 +27,17 @@ const actionHandler = async (run: Run, threads: OpenAI.Beta.Threads, threadId: s
               threadId
             );
           }
-          if(toolCall.function.name === "available_slot") {
+          if (toolCall.function.name === "available_slot") {
             functionResponse = await available_slot(
               toolCall.function.arguments,
               run,
               threads,
               threadId
             );
+          }
+          if (toolCall.function.name === "current_timestamp") {
+            functionResponse = await new Promise((resolve)=> resolve(new Date()))
+            run = await threads.runs.retrieve(threadId!, run.id);
           }
           console.log(new Date(), "functionResponse", functionResponse)
           
@@ -59,9 +64,12 @@ const actionHandler = async (run: Run, threads: OpenAI.Beta.Threads, threadId: s
 
 async function appointment_scheduler(args: string, run: Run, threads: OpenAI.Beta.Threads, threadId: string) {
     const patient: Patient = JSON.parse(args)
+    debugger;
     console.log(patient)
-    patient.schedule_start_datetime = new Date(patient.schedule_start_datetime).toISOString()
-    patient.schedule_end_datetime = new Date(patient.schedule_end_datetime).toISOString()
+    if(patient.schedule_type !== ScheduleType.delete) {
+      patient.schedule_start_datetime = new Date(patient.schedule_start_datetime).toISOString()
+      patient.schedule_end_datetime = new Date(patient.schedule_end_datetime).toISOString()
+    }
 
     console.log(new Date(), run.status, "schedule_type", patient.schedule_type)
     let response;
