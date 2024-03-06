@@ -5,17 +5,24 @@ import createMessage, { Input } from "./helpers/createMessage";
 import  { createThreadRun, queuedOrInprogressRun } from "./helpers/threadRun";
 import actionHandler from "./helpers/actionHandler";
 import assistantResponse from "./helpers/assistantResponse";
+import { NextRequest } from "next/server";
 
 // Create an OpenAI API client (that's edge friendly!)
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || "",
 });
-
 // IMPORTANT! Set the runtime to edge
 // export const runtime = "edge";
 const threads = openai.beta.threads;
 
 export async function POST(req: Request) {
+  console.log(new Date())
+  await new Promise((resolve) => {
+    setTimeout(()=> {
+      console.log(new Date())
+        resolve(true)
+      }, 12000);
+  })
   // Parse the request body
   const input: Input = await req.json();
   console.log(new Date(), "Request Initiated Input", input)
