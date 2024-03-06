@@ -21,7 +21,7 @@ const queuedOrInprogressRun = async (run: Run, threads: any, threadId: string) =
           setTimeout(()=> {
               console.log(new Date(), "Run in progress 1...", run.status)
               resolve(true)
-            }, 500);
+            }, 200);
         })
         
         run = await threads.runs.retrieve(threadId!, run.id);

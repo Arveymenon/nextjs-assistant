@@ -16,13 +16,6 @@ const openai = new OpenAI({
 const threads = openai.beta.threads;
 
 export async function POST(req: Request) {
-  console.log(new Date())
-  await new Promise((resolve) => {
-    setTimeout(()=> {
-      console.log(new Date())
-        resolve(true)
-      }, 12000);
-  })
   // Parse the request body
   const input: Input = await req.json();
   console.log(new Date(), "Request Initiated Input", input)
@@ -60,20 +53,8 @@ export async function POST(req: Request) {
         ) {
           throw new Error(run.status);
         }
-
-        while(run.status !== 'completed') {
-          await new Promise((resolve) => {
-            setTimeout(()=> {
-                console.log(new Date(),run.status, "Run in progress 2 ...", run.status)
-                resolve(true)
-              }, 2000);
-          })
-          console.log(new Date(),run.status, "Run not completed: Current Status", run.status)
-          run = await threads.runs.retrieve(threadId!, run.id);
-        }
         console.log(new Date(),run.status, "Run Completed")
       }
-      console.log(new Date(),run.status, "Waiting for run")
       await waitForRun(run);
 
       // Get new thread messages (after our message)
