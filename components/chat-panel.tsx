@@ -18,20 +18,22 @@ export interface ChatPanelProps
     | 'messages'
     | 'input'
     | 'setInput'
-  > {
-  id?: string
-  title?: string
+    > {
+    id?: string
+    title?: string
+    voiceChatEnabled: boolean
 }
 
 export function ChatPanel({
   id,
   title,
+  voiceChatEnabled,
   status,
   submitMessage,
   handleInputChange,
   messages,
   input,
-  setInput
+  setInput,
 }: ChatPanelProps) {
   const [shareDialogOpen, setShareDialogOpen] = React.useState(false)
 
@@ -61,17 +63,6 @@ export function ChatPanel({
                       <IconShare className="mr-2" />
                       Share
                     </Button>
-                    {/* <ChatShareDialog
-                      open={shareDialogOpen}
-                      onOpenChange={setShareDialogOpen}
-                      onCopy={() => setShareDialogOpen(false)}
-                      shareChat={shareChat}
-                      chat={{
-                        id,
-                        title,
-                        messages
-                      }}
-                    /> */}
                   </>
                 ) : null}
               </div>
@@ -85,6 +76,7 @@ export function ChatPanel({
             input={input}
             setInput={setInput}
             isLoading={status === 'in_progress'}
+            voiceChatEnabled={voiceChatEnabled}
           />
         </div>
       </div>

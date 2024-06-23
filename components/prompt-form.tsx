@@ -17,7 +17,8 @@ export interface PromptProps
   extends Pick<UseAssistantHelpers, 'input' | 'setInput'> {
   submitMessage: (e: React.FormEvent<HTMLFormElement>) => void,
   handleInputChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void,
-  isLoading: boolean
+  isLoading: boolean,
+  voiceChatEnabled: boolean
 }
 
 export function PromptForm({
@@ -25,7 +26,8 @@ export function PromptForm({
   handleInputChange,
   input,
   setInput,
-  isLoading
+  isLoading,
+  voiceChatEnabled
 }: PromptProps) {
   const { formRef, onKeyDown } = useEnterSubmit()
   const inputRef = React.useRef<HTMLTextAreaElement>(null)
@@ -78,18 +80,20 @@ export function PromptForm({
           spellCheck={false}
           className="min-h-[60px] w-full resize-none bg-transparent px-4 py-[1.3rem] focus-within:outline-none sm:text-sm"
         />
-      <div className="absolute top-4 right-[3.5rem]">
-        <Tooltip>
-          <TooltipTrigger asChild>
-              <Microphone
-                  disabled={isLoading} recording={recording} setRecording={setRecording} onSubmit={(text)=> {
-                  setInput(text)
-                  setMicrophoneUsed(true)
-                }}/>
-          </TooltipTrigger>
-          <TooltipContent>Send message</TooltipContent>
-          </Tooltip>
-        </div>
+        {voiceChatEnabled &&
+          <div className="absolute top-4 right-[3.5rem]">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                  <Microphone
+                      disabled={isLoading} recording={recording} setRecording={setRecording} onSubmit={(text)=> {
+                      setInput(text)
+                      setMicrophoneUsed(true)
+                    }}/>
+              </TooltipTrigger>
+              <TooltipContent>Send message</TooltipContent>
+              </Tooltip>
+            </div>
+        }
         <div className="absolute top-4 right-0 sm:right-4">
           <Tooltip>
             <TooltipTrigger asChild>
