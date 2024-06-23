@@ -19,9 +19,10 @@ export interface ChatPanelProps
     | 'input'
     | 'setInput'
     | 'voiceChatEnabled'
-  > {
-  id?: string
-  title?: string
+    > {
+    id?: string
+    title?: string
+    voiceChatEnabled: boolean
 }
 
 export function ChatPanel({
