@@ -8,6 +8,7 @@ import { ButtonScrollToBottom } from '@/components/button-scroll-to-bottom'
 import { IconRefresh, IconShare, IconStop } from '@/components/ui/icons'
 import { FooterText } from '@/components/footer'
 import { ChatShareDialog } from '@/components/chat-share-dialog'
+import { ClientConfig } from '@/lib/Database/ChatBotConfig/clientConfigDatabase'
 
 export interface ChatPanelProps
   extends Pick<
@@ -22,12 +23,14 @@ export interface ChatPanelProps
     id?: string
     title?: string
     voiceChatEnabled: boolean
+    config: ClientConfig
 }
 
 export function ChatPanel({
   id,
   title,
   voiceChatEnabled,
+  config,
   status,
   submitMessage,
   handleInputChange,
@@ -69,7 +72,7 @@ export function ChatPanel({
             )
           )}
         </div>
-        <div className="px-4 py-2 space-y-4 border-t shadow-lg bg-background sm:rounded-t-xl sm:border md:py-4">
+        <div className="px-4 py-2 space-y-4 md:py-4">
           <PromptForm
             submitMessage={submitMessage}
             handleInputChange={handleInputChange}

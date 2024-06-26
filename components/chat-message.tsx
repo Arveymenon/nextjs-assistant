@@ -13,9 +13,10 @@ import { ChatMessageActions } from '@/components/chat-message-actions'
 
 export interface ChatMessageProps {
   message: Message
+  config: any
 }
 
-export function ChatMessage({ message, ...props }: ChatMessageProps) {
+export function ChatMessage({ message, config, ...props }: ChatMessageProps) {
   return (
     <div
       className={cn('group relative mb-4 flex items-start md:-ml-12')}
@@ -29,7 +30,10 @@ export function ChatMessage({ message, ...props }: ChatMessageProps) {
             : 'bg-primary text-primary-foreground'
         )}
       >
-        {message.role === 'user' ? <IconUser /> : <IconOpenAI />}
+        
+        {message.role === 'user' ?
+               config?.icon_client ?  <img src={config.icon_client} /> : <IconUser /> :
+               config?.icon_bot ? <img src={config.icon_bot} /> : <IconOpenAI />}
       </div>
       <div className="flex-1 px-1 ml-4 space-y-2 overflow-hidden">
         <MemoizedReactMarkdown
