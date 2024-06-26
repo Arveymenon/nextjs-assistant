@@ -46,7 +46,7 @@ export function Chat({ initialMessages, className }: ChatProps) {
       setTextToBeSpoken(messages[messages.length-1].content)
     }
 
-  }, [messages])
+  }, [Features.voiceChat, messages])
   
   useEffect(()=>{
     fetch('/api/config?clientConfigId=1', {
