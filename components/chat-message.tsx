@@ -10,6 +10,7 @@ import { CodeBlock } from '@/components/ui/codeblock'
 import { MemoizedReactMarkdown } from '@/components/markdown'
 import { IconOpenAI, IconUser } from '@/components/ui/icons'
 import { ChatMessageActions } from '@/components/chat-message-actions'
+import Image from 'next/image'
 
 export interface ChatMessageProps {
   message: Message
@@ -32,8 +33,8 @@ export function ChatMessage({ message, config, ...props }: ChatMessageProps) {
       >
         
         {message.role === 'user' ?
-               config?.icon_client ?  <img src={config.icon_client} /> : <IconUser /> :
-               config?.icon_bot ? <img src={config.icon_bot} /> : <IconOpenAI />}
+               config?.icon_client ?  <Image src={config.icon_client} alt="" /> : <IconUser /> :
+               config?.icon_bot ? <Image src={config.icon_bot} alt="" /> : <IconOpenAI />}
       </div>
       <div className="flex-1 px-1 ml-4 space-y-2 overflow-hidden">
         <MemoizedReactMarkdown

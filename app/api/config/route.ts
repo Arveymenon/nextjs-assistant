@@ -1,6 +1,5 @@
 import clientConfigDatabase, { ClientConfig } from "@/lib/Database/ChatBotConfig/clientConfigDatabase";
-import { NextApiRequest, NextApiResponse } from "next";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: Request, response: Response) {
     const body = (await req.json()) as ClientConfig;
@@ -17,7 +16,7 @@ export async function POST(req: Request, response: Response) {
     return NextResponse.json(res);
 }
 
-export async function GET(req: NextApiRequest) {
+export async function GET(req: NextRequest) {
     console.log("GET CALL")
     console.log(req.url)
     // const { clientConfigId } = req.query; // Access query parameters

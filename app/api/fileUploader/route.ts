@@ -1,7 +1,7 @@
 import { put } from '@vercel/blob';
 import { NextResponse } from 'next/server';
 
-export const config = {
+const config = {
     api: {
        bodyParser: false,
     },
