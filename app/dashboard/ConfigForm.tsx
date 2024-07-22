@@ -7,6 +7,7 @@ import ColorPicker from "./components/form/colorPicker";
 import ImageUploader from "./components/form/image";
 import uploadFile from "@/lib/Storage/Vercel/Blob";
 import { ClientConfig } from "@/lib/Database/ChatBotConfig/clientConfigDatabase";
+import RichTextInput from "./components/form/richTextInput";
 
 
 export default function ConfigForm() {
@@ -51,6 +52,7 @@ export default function ConfigForm() {
                     favicon: (response.favicon && response.favicon != '.') ? response.favicon : '',
                     title: response.title,
                     theme: response.theme,
+                    instructions: response.instructions,
                 })
                 setIsLoading(false)
             }
@@ -179,6 +181,11 @@ export default function ConfigForm() {
                                 <div className="mb-4">
                                     <label htmlFor="welcome-subtext" className="block text-gray-700">Sub Text:</label>
                                     <Input id="welcome-subtext" value={formValues?.welcomeText?.subText} onChange={(value: string) => updateValue('welcomeText.subText', value)} />
+                                </div>
+
+                                <div className="mb-4">
+                                    <label htmlFor="welcome-subtext" className="block text-gray-700">Instructions:</label>
+                                    <RichTextInput id="welcome-subtext" value={formValues?.instructions} onChange={(value: string) => updateValue('instructions', value)} />
                                 </div>
 
                                 <button type="button" className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700"

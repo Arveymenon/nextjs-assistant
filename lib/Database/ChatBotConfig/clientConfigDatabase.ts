@@ -18,6 +18,7 @@ export type ClientConfig = {
   favicon?: string | File
   title?: string
   theme?: string
+  instructions?: string
 }
 
 const create = async (clientConfig: ClientConfig) => {
@@ -79,7 +80,8 @@ const update = async (clientConfig: ClientConfig) => {
                 logo_customer = '${(clientConfig.logo?.customer as string) || '.'}',
                 favicon = '${(clientConfig.favicon as string) || '.'}',
                 title = '${clientConfig.title || '.'}',
-                theme = '${clientConfig.theme || '#000'}'
+                theme = '${clientConfig.theme || '#000'}',
+                instructions = '${clientConfig.instructions || null}'
             WHERE client_id = '${clientConfig.client}'
             RETURNING *;`)
     console.log('Response: ', rows)
