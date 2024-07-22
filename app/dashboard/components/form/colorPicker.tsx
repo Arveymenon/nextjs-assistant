@@ -14,7 +14,6 @@ const ColorPicker = ({
     value,
     onChange
 }: ColorPickerProps) => {
-    console.log("Color: ", value)
     const [color, setColor] = useState<string>(value || "hsl(0, 0%, 0%)");
     
     useEffect(()=>{if(value) setColor(value) },[value])

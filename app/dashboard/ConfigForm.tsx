@@ -8,6 +8,7 @@ import ImageUploader from "./components/form/image";
 import uploadFile from "@/lib/Storage/Vercel/Blob";
 import { ClientConfig } from "@/lib/Database/ChatBotConfig/clientConfigDatabase";
 import RichTextInput from "./components/form/richTextInput";
+import { toast } from 'react-hot-toast'
 
 
 export default function ConfigForm() {
@@ -15,8 +16,7 @@ export default function ConfigForm() {
     const [formValues, setFormValue] = useState<ClientConfig>({
         client: ''
     })
-    const [filesUploading, setFilesUploading] = useState<boolean | null>(null)
-    const [configUpdateInProgress, setConfigUpdateInProgress] = useState(false)
+
     const [isLoading, setIsLoading] = useState(false)
 
     // GET CLIENTS
@@ -79,9 +79,9 @@ export default function ConfigForm() {
     }
 
     const onSubmit = async () => {
-        let dateTime = new Date().toISOString()
+        const dateTime = new Date().toISOString()
         if (formValues) {
-            setFilesUploading(true)
+            const loaderId = toast.loading("Config update in progress")
             await Promise.all([
                 toBeUploaded(formValues.favicon) ? uploadFile('chatbot/favicon/' + dateTime + ".jpg", formValues.favicon as File) : Promise.resolve(),
                 toBeUploaded(formValues.icon?.client) ? uploadFile('chatbot/icons/client/' + dateTime + ".jpg", formValues.icon?.client as File) : Promise.resolve(),
@@ -95,21 +95,18 @@ export default function ConfigForm() {
                 responses[2] && updateValue('icon.bot', responses[2])
                 responses[3] && updateValue('logo.client', responses[3])
                 responses[4] && updateValue('logo.customer', responses[4])
-                setFilesUploading(false)
+                await responses;
+                
+                await fetch('/api/config', {
+                    method: "POST",
+                    body: JSON.stringify(formValues),
+                }).then(() => { 
+                    toast.dismiss(loaderId)
+                    toast.success('Config Updated Successfully')
+                })
             })
         }
     }
-
-
-    useMemo(async () => {
-        if (filesUploading == false && !configUpdateInProgress) {
-            setConfigUpdateInProgress(true)
-            await fetch('/api/config', {
-                method: "POST",
-                body: JSON.stringify(formValues),
-            }).then(() => { setConfigUpdateInProgress(false) })
-        }
-    }, [filesUploading])
 
     const toBeUploaded = (file: string | File | undefined) => {
         return (file && file instanceof File)
