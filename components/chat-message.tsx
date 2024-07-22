@@ -33,8 +33,8 @@ export function ChatMessage({ message, config, ...props }: ChatMessageProps) {
       >
         
         {message.role === 'user' ?
-               config?.icon_client ?  <Image src={config.icon_client} alt="" width={10}/> : <IconUser /> :
-               config?.icon_bot ? <Image src={config.icon_bot} alt="" width={10}/> : <IconOpenAI />}
+               config?.icon_client ?  <Image src={config.icon_client} alt="" width={10} height={10}/> : <IconUser /> :
+               config?.icon_bot ? <Image src={config.icon_bot} alt="" width={10} height={10}/> : <IconOpenAI />}
       </div>
       <div className="flex-1 px-1 ml-4 space-y-2 overflow-hidden">
         <MemoizedReactMarkdown
