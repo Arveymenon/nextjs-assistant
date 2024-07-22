@@ -10,7 +10,8 @@ export function EmptyScreen({config}: any) {
   useEffect(()=>{
     console.log(config)
     if(config.instructions){
-      const formattedContent = config.instructions.replace(/\n/g, '<br>');
+      const inst = atob(config.instructions)
+      const formattedContent = inst.replace(/\n/g, '<br>');
       // Sanitize the content
       const cleanHtml = DOMPurify.sanitize(formattedContent);
       setInstructions(cleanHtml)

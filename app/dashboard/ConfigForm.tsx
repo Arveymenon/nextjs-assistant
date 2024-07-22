@@ -52,7 +52,7 @@ export default function ConfigForm() {
                     favicon: (response.favicon && response.favicon != '.') ? response.favicon : '',
                     title: response.title,
                     theme: response.theme,
-                    instructions: response.instructions,
+                    instructions: atob(response.instructions),
                 })
                 setIsLoading(false)
             }

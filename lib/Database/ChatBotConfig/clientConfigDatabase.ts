@@ -39,7 +39,8 @@ const create = async (clientConfig: ClientConfig) => {
             '${(clientConfig.logo?.customer as string) || '.'}',
             '${(clientConfig.favicon as string) || '.'}',
             '${clientConfig.title || '.'}',
-            '${clientConfig.theme || '#000'}'
+            '${clientConfig.theme || '#000'}',
+            '${clientConfig.instructions || null}'
             )
             RETURNING *;
         `)
@@ -81,7 +82,7 @@ const update = async (clientConfig: ClientConfig) => {
                 favicon = '${(clientConfig.favicon as string) || '.'}',
                 title = '${clientConfig.title || '.'}',
                 theme = '${clientConfig.theme || '#000'}',
-                instructions = '${clientConfig.instructions || null}'
+                instructions = '${btoa(clientConfig.instructions || "") || '-'}'
             WHERE client_id = '${clientConfig.client}'
             RETURNING *;`)
     console.log('Response: ', rows)

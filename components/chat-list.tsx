@@ -17,7 +17,8 @@ export function ChatList({ messages, config }: ChatList) {
 
   useEffect(() => {
     if (config.instructions) {
-      const formattedContent = config.instructions.replace(/\n/g, '<br>');
+      const inst = atob(config.instructions)
+      const formattedContent = inst.replace(/\n/g, '<br>');
       const cleanHtml = DOMPurify.sanitize(formattedContent);
       setInstructions(cleanHtml);
     }
